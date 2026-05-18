@@ -1,0 +1,16 @@
+arbiter:
+  ros__parameters:
+    priorities:
+      safety: 100              # ToF hardware kill-switch
+      gesture_emergency: 95    # Project D - fist
+      traffic_red: 90          # Project B
+      reactive: 70             # Project C - obstacle avoidance
+      qr: 60                   # Project A - visual command
+      voice: 55                # Project E - spoken command
+      gesture: 50              # Project D - other gestures
+      follow: 45               # Project F - person following
+      default: 10
+    decay_rate_pts_per_sec: 2.0
+    stale_after_s: 0.3
+    v_max: 0.4
+    w_max: 1.5

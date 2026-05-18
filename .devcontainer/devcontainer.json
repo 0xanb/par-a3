@@ -1,0 +1,48 @@
+{
+  "name": "PAR-A3 ROS 2 Jazzy",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder}/workspace,target=/workspace,type=bind,consistency=cached",
+  "remoteUser": "ros",
+  "runArgs": [
+    "--name=par-a3-dev",
+    "--hostname=par-dev",
+    "--network=host"
+  ],
+  "containerEnv": {
+    "ROS_DOMAIN_ID": "42",
+    "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp"
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/docs,target=/workspace/../docs,type=bind",
+    "source=${localWorkspaceFolder}/scripts,target=/workspace/../scripts,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-iot.vscode-ros",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml",
+        "twxs.cmake"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "ros.distro": "jazzy",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "files.associations": {
+          "*.launch": "xml",
+          "*.world": "xml",
+          "*.sdf": "xml",
+          "*.urdf": "xml"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "sudo rosdep update || true"
+}

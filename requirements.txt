@@ -1,0 +1,12 @@
+# Host-side Python dependencies for offline analysis, trial plotting,
+# QR code generation, and image utilities. ROS 2 packages declare their own
+# Python and ament dependencies through package.xml and setup.py and are
+# installed inside the dev container by ./scripts/dev.sh up.
+
+matplotlib>=3.7
+numpy>=1.24
+opencv-python>=4.8
+pandas>=2.0
+Pillow>=10.0
+PyYAML>=6.0
+qrcode>=7.4
