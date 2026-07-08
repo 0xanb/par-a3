@@ -162,3 +162,11 @@ colcon test
 ```
 
 If still 324, identify the failing package and re-run that suite specifically.
+
+## Snap platform
+
+| Symptom | Likely cause | Fix |
+|---------|--------------|-----|
+| Everything worked, then after a reboot every Husarion driver dies: rplidar exits 127 with `undefined symbol ...fastcdr...`, `robot_state_publisher` dead, `controller_manager` loops "Waiting for data on 'robot_description'" | snapd auto-refreshed the `ros-jazzy-ros-base` content snap under driver snaps built against an older fastcdr. Running processes keep old mapped libraries, so nothing fails until the first restart | Confirm with `snap changes`, then `sudo snap revert ros-jazzy-ros-base` and restart the Husarion daemons. Consider `sudo snap refresh --hold ros-jazzy-ros-base husarion-rplidar rosbot` around demo days, and unhold deliberately afterwards |
+| rplidar daemon dies seconds after start: SDK banner prints, then `SL_RESULT_OPERATION_TIMEOUT`; the USB-UART adapter enumerates fine and the port is free | The snap is configured for the wrong lidar model, so the handshake runs at the wrong baud rate and the device never answers. A bus-powered adapter enumerates even when the sensor is silent, so this masquerades as dead hardware | Check `sudo snap get husarion-rplidar configuration` against the physical unit (the ROSbot 3 PRO ships the RPLIDAR S2). `sudo snap set husarion-rplidar configuration=s2` and restart; a healthy S2 reports `health : OK` and `DenseBoost, 32 kHz` |
+| `/range/*` and `/battery` go silent while `/joint_states` keeps flowing; the firmware node is still in the graph but its publisher count is 0 | The micro-ROS firmware bridge dropped its publishers | Full `sudo snap stop rosbot.daemon && sleep 5 && sudo snap start rosbot.daemon` (stop/start, not restart). If the controller spawners then miss their 20 s window, a full reboot brings the chain up reliably — prefer it before a demo |
