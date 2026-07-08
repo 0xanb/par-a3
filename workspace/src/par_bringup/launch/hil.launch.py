@@ -11,12 +11,12 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 
-def generate_launch_description:
- mode = LaunchConfiguration("mode", default="hil")
- return LaunchDescription([
- DeclareLaunchArgument("mode", default_value="hil"),
- Node(package="par_arbiter", executable="arbiter", name="arbiter",
- parameters=[{"v_max": 0.0, "w_max": 0.0, "mode": mode}]),
- Node(package="par_eval", executable="recorder", name="recorder",
- parameters=[{"trial_id": "hil", "mode": mode}]),
- ])
+def generate_launch_description():
+    mode = LaunchConfiguration("mode", default="hil")
+    return LaunchDescription([
+        DeclareLaunchArgument("mode", default_value="hil"),
+        Node(package="par_arbiter", executable="arbiter", name="arbiter",
+             parameters=[{"v_max": 0.0, "w_max": 0.0, "mode": mode}]),
+        Node(package="par_eval", executable="recorder", name="recorder",
+             parameters=[{"trial_id": "hil", "mode": mode}]),
+    ])

@@ -12,36 +12,36 @@ from typing import Callable
 
 @dataclass
 class Transition:
- src: str
- dst: str
- guard: Callable[, bool]
+    src: str
+    dst: str
+    guard: Callable[..., bool]
 
 
 @dataclass
 class BehaviorFSM:
- state: str
- transitions: list[Transition] = field(default_factory=list)
- on_enter: dict[str, Callable[[], None]] = field(default_factory=dict)
- on_exit: dict[str, Callable[[], None]] = field(default_factory=dict)
+    state: str
+    transitions: list[Transition] = field(default_factory=list)
+    on_enter: dict[str, Callable[[], None]] = field(default_factory=dict)
+    on_exit: dict[str, Callable[[], None]] = field(default_factory=dict)
 
- def add(self, src: str, dst: str, guard: Callable[, bool]) -> None:
- self.transitions.append(Transition(src, dst, guard))
+    def add(self, src: str, dst: str, guard: Callable[..., bool]) -> None:
+        self.transitions.append(Transition(src, dst, guard))
 
- def tick(self, *args, **kwargs) -> str:
- for t in self.transitions:
- if t.src == self.state and t.guard(*args, **kwargs):
- self._leave(self.state)
- self.state = t.dst
- self._enter(self.state)
- break
- return self.state
+    def tick(self, *args, **kwargs) -> str:
+        for t in self.transitions:
+            if t.src == self.state and t.guard(*args, **kwargs):
+                self._leave(self.state)
+                self.state = t.dst
+                self._enter(self.state)
+                break
+        return self.state
 
- def _enter(self, s: str) -> None:
- cb = self.on_enter.get(s)
- if cb:
- cb
+    def _enter(self, s: str) -> None:
+        cb = self.on_enter.get(s)
+        if cb:
+            cb()
 
- def _leave(self, s: str) -> None:
- cb = self.on_exit.get(s)
- if cb:
- cb
+    def _leave(self, s: str) -> None:
+        cb = self.on_exit.get(s)
+        if cb:
+            cb()

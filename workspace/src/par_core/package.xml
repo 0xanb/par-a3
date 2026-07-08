@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
 <package format="3">
- <name>par_core</name>
- <version>0.1.0</version>
- <description>Shared utilities: SensorBus, SafetyLayer, BehaviorFSM, Telemetry.</description>
- <maintainer email="student@rmit.edu.au">PAR Group</maintainer>
- <license>MIT</license>
+  <name>par_core</name>
+  <version>0.1.0</version>
+  <description>Shared utilities: SensorBus, SafetyLayer, BehaviorFSM, Telemetry.</description>
+  <maintainer email="student@rmit.edu.au">PAR Group</maintainer>
+  <license>MIT</license>
 
- <buildtool_depend>ament_python</buildtool_depend>
+  <buildtool_depend>ament_python</buildtool_depend>
 
- <depend>rclpy</depend>
- <depend>std_msgs</depend>
- <depend>geometry_msgs</depend>
- <depend>sensor_msgs</depend>
- <depend>par_msgs</depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>par_msgs</depend>
 
- <export>
- <build_type>ament_python</build_type>
- </export>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
 </package>

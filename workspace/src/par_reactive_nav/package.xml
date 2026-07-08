@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <package format="3">
- <name>par_reactive_nav</name>
- <version>0.1.0</version>
- <description>Project C — reactive navigation (VFH+ with LIDAR/depth fusion).</description>
- <maintainer email="student@rmit.edu.au">PAR Group</maintainer>
- <license>MIT</license>
- <buildtool_depend>ament_python</buildtool_depend>
- <depend>rclpy</depend>
- <depend>sensor_msgs</depend>
- <depend>geometry_msgs</depend>
- <depend>par_msgs</depend>
- <depend>par_core</depend>
- <export><build_type>ament_python</build_type></export>
+  <name>par_reactive_nav</name>
+  <version>0.1.0</version>
+  <description>Project C — reactive navigation (VFH+ with LIDAR/depth fusion).</description>
+  <maintainer email="student@rmit.edu.au">PAR Group</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>par_msgs</depend>
+  <depend>par_core</depend>
+  <export><build_type>ament_python</build_type></export>
 </package>

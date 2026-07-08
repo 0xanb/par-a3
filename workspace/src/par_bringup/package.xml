@@ -1,18 +1,19 @@
 <?xml version="1.0"?>
 <package format="3">
- <name>par_bringup</name>
- <version>0.1.0</version>
- <description>Launch files and configs for all PAR projects (sim + real).</description>
- <maintainer email="student@rmit.edu.au">PAR Group</maintainer>
- <license>MIT</license>
- <buildtool_depend>ament_cmake</buildtool_depend>
- <exec_depend>par_core</exec_depend>
- <exec_depend>par_msgs</exec_depend>
- <exec_depend>par_qr_nav</exec_depend>
- <exec_depend>par_reactive_nav</exec_depend>
- <exec_depend>par_gesture</exec_depend>
- <exec_depend>par_arbiter</exec_depend>
- <exec_depend>par_supervisor</exec_depend>
- <exec_depend>par_eval</exec_depend>
- <export><build_type>ament_cmake</build_type></export>
+  <name>par_bringup</name>
+  <version>0.1.0</version>
+  <description>Launch files and configs for all PAR projects (sim + real).</description>
+  <maintainer email="student@rmit.edu.au">PAR Group</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>par_core</exec_depend>
+  <exec_depend>par_msgs</exec_depend>
+  <exec_depend>par_qr_nav</exec_depend>
+  <exec_depend>par_traffic_light</exec_depend>
+  <exec_depend>par_reactive_nav</exec_depend>
+  <exec_depend>par_gesture</exec_depend>
+  <exec_depend>par_arbiter</exec_depend>
+  <exec_depend>par_supervisor</exec_depend>
+  <exec_depend>par_eval</exec_depend>
+  <export><build_type>ament_cmake</build_type></export>
 </package>

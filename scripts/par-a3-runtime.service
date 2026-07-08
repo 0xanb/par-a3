@@ -1,0 +1,22 @@
+[Unit]
+Description=PAR-A3 runtime (arbiter + QR pipeline + Foxglove bridge)
+Documentation=https://github.com/0xanb/rmit/blob/main/PAR-A3/HANDOFF.md
+After=network-online.target snap.husarion-depthai.daemon.service snap.husarion-rplidar.daemon.service snap.rosbot.daemon.service
+Wants=network-online.target snap.husarion-depthai.daemon.service snap.husarion-rplidar.daemon.service snap.rosbot.daemon.service
+
+[Service]
+Type=simple
+User=husarion
+Group=husarion
+EnvironmentFile=-/etc/default/par-a3-runtime
+WorkingDirectory=/home/husarion/par_ws
+ExecStart=/home/husarion/par-a3-runtime.sh
+Restart=on-failure
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=10
+StandardOutput=append:/var/log/par-a3-runtime.log
+StandardError=append:/var/log/par-a3-runtime.log
+
+[Install]
+WantedBy=multi-user.target
