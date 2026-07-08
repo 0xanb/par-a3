@@ -36,7 +36,9 @@
 #     thumbs down = SPEED_DOWN.
 #   - The gun-pose TURN_LEFT / TURN_RIGHT verbs are unreliable at seated
 #     distance (0-2 hits in 8 during the POC) — skip them in demos.
-set -euo pipefail
+#
+# No `set -u`: ROS setup.bash reads variables it does not define.
+set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS="$SCRIPT_DIR/../workspace"
