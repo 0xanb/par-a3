@@ -93,6 +93,19 @@ FINGERS = {
 _FINGER_EXTENDED_DIST: float = 0.10
 _FINGER_CURLED_DIST: float   = 0.07
 _FINGER_EXTENSION_MARGIN: float = 0.02   # kept for thumb helpers
+# Radius (normalised Euclidean distance from THUMB_TIP to INDEX_MCP) below
+# which the thumb counts as "tucked across the palm" (closed_fist / STOP).
+# : widened from 0.08 after live testing showed real closed
+# fists often rest the thumb across the curled fingers rather than
+# exactly at INDEX_MCP, so the strict 0.08 radius silently failed
+# thumb_tucked() and let STOP fall through to SPEED_UP/SPEED_DOWN below.
+# Capped at 0.10 (not wider): the "no match" negative-test hand (a
+# deliberately ambiguous half-curled fixture, see
+# test_classify_no_match_returns_none) sits at distance ~0.112 from
+# INDEX_MCP specifically to probe this boundary from outside, and 0.10
+# still leaves a large margin against thumbs-up/down (~0.21 in the test
+# fixtures) so it cannot collide with that disambiguation either.
+_THUMB_TUCKED_RADIUS: float = 0.10
 # Min visibility (per-landmark confidence). MediaPipe Hands returns landmark
 # scores via the post-processing wrapper; we accept slightly lower than the
 # pose model used because hand tracking is naturally noisier.
@@ -169,14 +182,14 @@ def thumb_extended_down(lm, *, margin: float = _FINGER_EXTENSION_MARGIN) -> bool
     return _y(lm, THUMB_TIP) > _y(lm, THUMB_MCP) + margin
 
 
-def thumb_tucked(lm, *, margin: float = _FINGER_EXTENSION_MARGIN) -> bool:
+def thumb_tucked(lm, *, radius: float = _THUMB_TUCKED_RADIUS) -> bool:
     """Thumb tip lies near the index MCP — i.e. the thumb has rotated across
     the palm (the closed-fist position). Confirmed by a small Euclidean
     radius around INDEX_MCP rather than only an x-axis check, so a thumbs-
     down hand (tip far below the palm) does not register as tucked."""
     dx = _x(lm, THUMB_TIP) - _x(lm, INDEX_MCP)
     dy = _y(lm, THUMB_TIP) - _y(lm, INDEX_MCP)
-    return (dx * dx + dy * dy) ** 0.5 < 0.08
+    return (dx * dx + dy * dy) ** 0.5 < radius
 
 
 def all_fingers_extended(lm) -> bool:
@@ -252,10 +265,13 @@ def ok_sign(lm) -> bool:
 
 
 def closed_fist(lm) -> bool:
-    """Punch — all four fingers curled into the palm AND the thumb folded
-    across or onto the palm. The thumb-tucked guard rejects loose half-
-    closed hands and a thumbs-up that happens to be poorly held."""
-    return all_fingers_curled(lm) and thumb_tucked(lm)
+    """Punch — at least 3 of 4 fingers curled into the palm (same tolerance
+    as SPEED_UP/SPEED_DOWN's fingers_mostly_curled — a strict all-four
+    requirement was too easily broken by a half-curled pinky) AND the
+    thumb folded across or onto the palm. The thumb-tucked guard rejects
+    loose half-closed hands and a thumbs-up that happens to be poorly
+    held."""
+    return fingers_mostly_curled(lm) and thumb_tucked(lm)
 
 
 # Direction threshold for the open-palm pointing turn cue. The
@@ -355,28 +371,40 @@ def classify(
     if peace_sign(lm):
         return "U_TURN"
 
-    # 2. Thumbs up / down — thumb extended vertically AND held outside the
+    fingers_curled_loose = fingers_mostly_curled(lm)
+    thumb_clear = not thumb_tucked(lm)
+
+    # 2. Closed fist — STOP. Checked here, before thumbs up/down, even
+    # though both branches test the same curled-fingers shape: they are
+    # disambiguated only by thumb position, and when a fist's thumb sits
+    # near the tucked/untucked boundary the safety verb must win the tie.
+    # : previously last in the chain with a strict all-four-
+    # curled requirement — real closed fists whose thumb rests across the
+    # curled fingers (rather than exactly at INDEX_MCP) failed the old
+    # 0.08 thumb_tucked() radius and silently fell through to
+    # SPEED_UP/SPEED_DOWN below instead of registering as STOP.
+    if fingers_curled_loose and thumb_tucked(lm):
+        return "STOP"
+
+    # 3. Thumbs up / down — thumb extended vertically AND held outside the
     # palm so it cannot be confused with a fist. The "not tucked" guard
     # distinguishes a clear thumbs-up from a relaxed fist whose thumb is
     # folded across the palm. Curl check is "mostly curled" (≥3 of 4) so
     # a half-curled pinky does not break detection — see
     # fingers_mostly_curled() rationale.
-    fingers_curled_strict = all_fingers_curled(lm)
-    fingers_curled_loose = fingers_mostly_curled(lm)
-    thumb_clear = not thumb_tucked(lm)
     if fingers_curled_loose and thumb_clear and thumb_extended_up(lm):
         return "SPEED_UP"
     if fingers_curled_loose and thumb_clear and thumb_extended_down(lm):
         return "SPEED_DOWN"
 
-    # 3. OK sign — thumb tip touches index tip; middle/ring/pinky extended.
+    # 4. OK sign — thumb tip touches index tip; middle/ring/pinky extended.
     # This replaces the closed-fist GO from earlier revisions; the OK sign
     # is unambiguous and will not be triggered by a relaxed idle hand. See
     # for the rationale.
     if ok_sign(lm):
         return "GO"
 
-    # 4. Direction (TURN_LEFT / TURN_RIGHT). Two acceptable forms, checked
+    # 5. Direction (TURN_LEFT / TURN_RIGHT). Two acceptable forms, checked
     # in order of robustness:
     #
     #   (a) "Gun" pose — fingers extended in direction + thumb extended UP.
@@ -398,14 +426,5 @@ def classify(
         return "TURN_LEFT"
     if palm_pointing_right(lm):
         return "TURN_RIGHT"
-
-    # 5. Closed fist — STOP. Replaces the older open-palm STOP .
-    # Last in the chain because it is the lowest-information pose and would
-    # otherwise absorb half-closed transitional hands; the strict all-four-
-    # curled check (via closed_fist) keeps the relaxed thumbs-up/down rule
-    # above from leaking into STOP, and the thumb-tucked guard rejects
-    # accidental thumbs-up classifications.
-    if fingers_curled_strict and thumb_tucked(lm):
-        return "STOP"
 
     return None
