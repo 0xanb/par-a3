@@ -265,13 +265,16 @@ def ok_sign(lm) -> bool:
 
 
 def closed_fist(lm) -> bool:
-    """Punch — at least 3 of 4 fingers curled into the palm (same tolerance
-    as SPEED_UP/SPEED_DOWN's fingers_mostly_curled — a strict all-four
-    requirement was too easily broken by a half-curled pinky) AND the
-    thumb folded across or onto the palm. The thumb-tucked guard rejects
-    loose half-closed hands and a thumbs-up that happens to be poorly
-    held."""
-    return fingers_mostly_curled(lm) and thumb_tucked(lm)
+    """Punch — all four fingers curled into the palm AND the thumb folded
+    across or onto the palm. Deliberately stricter than SPEED_UP/SPEED_DOWN's
+ fingers_mostly_curled: field testing showed the loose 3-of-4
+    variant let STOP swallow other poses (e.g. a gun-pose turn seen at an
+    angle, where perspective foreshortens one or two fingers below the
+    curled threshold) well before they reached their own rules. The
+    thumb-tucked guard (widened radius, see _THUMB_TUCKED_RADIUS) still
+    handles the original under-detection failure without needing the
+    curl side loosened too."""
+    return all_fingers_curled(lm) and thumb_tucked(lm)
 
 
 # Direction threshold for the open-palm pointing turn cue. The
@@ -371,7 +374,6 @@ def classify(
     if peace_sign(lm):
         return "U_TURN"
 
-    fingers_curled_loose = fingers_mostly_curled(lm)
     thumb_clear = not thumb_tucked(lm)
 
     # 2. Closed fist — STOP. Checked here, before thumbs up/down, even
@@ -383,7 +385,11 @@ def classify(
     # curled fingers (rather than exactly at INDEX_MCP) failed the old
     # 0.08 thumb_tucked() radius and silently fell through to
     # SPEED_UP/SPEED_DOWN below instead of registering as STOP.
-    if fingers_curled_loose and thumb_tucked(lm):
+    # : the curl side stays STRICT (all_fingers_curled), not the
+    # loose 3-of-4 used below — loosening it too let STOP swallow other
+    # poses (a gun-pose turn foreshortened by camera angle) before they
+    # reached their own rules. Only the thumb radius needed widening.
+    if closed_fist(lm):
         return "STOP"
 
     # 3. Thumbs up / down — thumb extended vertically AND held outside the
@@ -392,6 +398,7 @@ def classify(
     # folded across the palm. Curl check is "mostly curled" (≥3 of 4) so
     # a half-curled pinky does not break detection — see
     # fingers_mostly_curled() rationale.
+    fingers_curled_loose = fingers_mostly_curled(lm)
     if fingers_curled_loose and thumb_clear and thumb_extended_up(lm):
         return "SPEED_UP"
     if fingers_curled_loose and thumb_clear and thumb_extended_down(lm):
